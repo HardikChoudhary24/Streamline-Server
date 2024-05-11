@@ -1,5 +1,5 @@
 import { prisma } from "../../clients/db";
-import { generateJWT } from "../../services/JWT";
+import { decodeJWT, generateJWT } from "../../services/JWT";
 import { CreateUserPayload, GraphqlContext, LoginPayload } from "../interfaces";
 import bcrypt from "bcryptjs";
 
@@ -13,10 +13,22 @@ const queries = {
     });
 
     if (user && (await bcrypt.compare(payload.password, user.password))) {
-      return { token: generateJWT(user), success: true };
+      const room = await prisma.roomParticipants.findFirst({
+        where: { memberId: user.id },
+      });
+      return {
+        token: generateJWT(user),
+        success: true,
+        url: !room ? "/dashboard/user-role" : "/dashboard/drafts",
+      };
     }
 
-    return { token: "", success: false };
+    return { token: "", success: false, url: "" };
+  },
+  verifyToken: async (parent: any, args: any, contextValue: GraphqlContext) => {
+    const id = contextValue.user?.id;
+    if (id) return { success: true };
+    return { success: false };
   },
   getCurrentUser: async (
     parent: any,
@@ -24,11 +36,13 @@ const queries = {
     contextValue: GraphqlContext
   ) => {
     const id = contextValue.user?.id;
-    if(!id) throw new Error("User not Authenticated");
+    if (!id) throw new Error("User not Authenticated");
 
-    const user = await prisma.user.findUnique({where:{id:contextValue.user?.id}})
+    const user = await prisma.user.findUnique({
+      where: { id: contextValue.user?.id },
+    });
 
-    return {...user,password:""};
+    return { ...user, password: "" };
   },
 };
 
@@ -39,6 +53,7 @@ const mutations = {
     contextValue: GraphqlContext
   ) => {
     let user;
+    if (!payload) return null;
     if (payload.email) {
       user = await prisma.user.findUnique({
         where: { email: payload.email },
@@ -49,15 +64,12 @@ const mutations = {
       return { user: user, userExist: true };
     }
 
-    if (!payload) return null;
-
     const encPassword = await bcrypt.hash(payload.password, 10);
 
     user = await prisma.user.create({
       data: {
-        firstName: payload.firstName,
-        lastName: payload.lastName || "",
-        profileImageURL: payload?.firstName,
+        name: payload.name,
+        profileImageURL: payload?.name,
         email: payload.email,
         password: encPassword,
         userName: payload.userName,

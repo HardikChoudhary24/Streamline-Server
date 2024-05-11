@@ -15,8 +15,7 @@ datasource db {
 
 model User {
   id              String             @id @default(uuid())
-  firstName       String
-  lastName        String?
+  name            String
   userName        String             @unique
   password        String
   profileImageURL String?
@@ -54,4 +53,12 @@ model Project {
 
   room   Room   @relation("ProjectOfRoom", fields: [roomId], references: [id])
   roomId String
+}
+
+model Invites{
+  invitedEmail String
+  token String
+  invitedBy String @unique
+  roomId String
+  @@id([invitedEmail, invitedBy])
 }

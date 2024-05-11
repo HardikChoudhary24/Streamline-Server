@@ -2,7 +2,7 @@ import { introspectionFromSchema } from "graphql";
 
 export interface JWTUser {
   id: string;
-  firstName: string;
+  name: string;
   email: string;
 }
 
@@ -13,12 +13,23 @@ export interface GraphqlContext {
 export interface CreateUserPayload {
   email: string;
   userName: string;
-  firstName: string;
-  lastName?: string;
+  name: string;
   profileImageURL?: string;
   password: string;
 }
 export interface LoginPayload {
-  email: string
-  password: string
+  email: string;
+  password: string;
+}
+export interface SendInvite {
+  inviteEmail: string;
+  workspaceId: string;
+}
+
+export interface CreateProjectPayload {
+  videoUrl: string;
+  thumbnailUrl: string;
+  title: string;
+  description: string;
+  roomId: string;
 }

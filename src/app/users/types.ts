@@ -1,8 +1,7 @@
 export const types = `#graphql
     type User{
         id:ID!
-        firstName:String!
-        lastName:String
+        name:String
         userName:String!
         profileImageURL:String
         email:String!
@@ -10,10 +9,9 @@ export const types = `#graphql
 
     input CreateUserPayload{
         email:String!
+        name:String
         userName:String!
-        firstName:String!
         password:String!
-        lastName:String
         profileImageURL:String
     }
 
@@ -29,6 +27,10 @@ export const types = `#graphql
 
     type AuthenticateResponse{
         token:String
+        success:Boolean
+        url:String
+    }
+    type VerifyTokenResponse{
         success:Boolean
     }
 `;
